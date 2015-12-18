@@ -1,0 +1,7 @@
+---
+- include: install-debian.yml
+  when: ansible_os_family == "Debian"
+
+- service: name=jenkins state=running enabled=yes
+
+- wait_for: port=8080

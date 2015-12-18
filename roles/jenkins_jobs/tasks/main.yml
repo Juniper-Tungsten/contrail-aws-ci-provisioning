@@ -1,0 +1,36 @@
+---
+- name: Wait for Jenkins to start up before proceeding.
+  shell: "curl -u admin:{{ jenkins_passwd }} -D - --silent http://localhost:8080/cli/"
+  register: result
+  until: (result.stdout.find("200 OK") != -1) and (result.stdout.find("Please wait while") == -1)
+  retries: 10
+  delay: 10
+  changed_when: false
+
+# - name: login
+#   command: java -jar "{{ jenkins_jar_location }}" -s http://localhost:8080 login --username admin --password "{{ jenkins_passwd }}"
+
+- name: Configure github plugin
+  command: curl -u "admin:{{ jenkins_passwd }}" --data-urlencode "script={{ github_plugin_config_script | replace('\"', '\\\"') }}" http://localhost:8080/scriptText
+  register: github_plugin_cmd
+
+- assert:
+    that:
+      - github_plugin_cmd.stdout == ""
+
+- name: container-networking-ansible config
+  template: src=container-networking-ansible-config.j2 dest="{{ job_config_tmp }}/container-networking-ansible-config.xml"
+
+- name: list jobs
+  command: java -jar {{ jenkins_jar_location }} -s http://localhost:8080 -i /var/lib/jenkins/jenkins.key list-jobs
+  register: job_list
+  
+- name: create container-networking-ansible job
+  shell: "cat {{ job_config_tmp }}/container-networking-ansible-config.xml | java -jar {{ jenkins_jar_location }} -s http://localhost:8080 -i /var/lib/jenkins/jenkins.key create-job container-networking-ansible"
+  register: create_job
+  when: "'container-networking-ansible' not in job_list.stdout_lines"
+
+- name: update container-networking-ansible job
+  shell: "cat {{ job_config_tmp }}/container-networking-ansible-config.xml | java -jar {{ jenkins_jar_location }} -s http://localhost:8080 -i /var/lib/jenkins/jenkins.key update-job container-networking-ansible"
+  register: update_job
+  when: "'container-networking-ansible' in job_list.stdout_lines"

@@ -1,0 +1,43 @@
+---
+- name: docker-py module
+  pip: name=docker-py state=present
+
+- name: docker volume
+  lvol: vg=vg.pool lv=docker-registry size=56g
+
+- name: file system
+  filesystem: fstype=ext4 dev=/dev/vg.pool/docker-registry
+
+- name: mount file system
+  mount: name=/var/lib/docker-registry src=/dev/vg.pool/docker-registry fstype=ext4 state=mounted
+
+- name: Generate self-signed certificate
+  command: >-
+    openssl req -x509 -newkey rsa:2048
+    -keyout /var/lib/docker-registry/cert.key
+    -out /var/lib/docker-registry/cert.crt
+    -days 365 -nodes
+    -subj "/CN=registry.{{ aws_region }}.dev.opencontrail.org"
+  args:
+    creates: /var/lib/docker-registry/cert.key
+
+- name: docker registry
+  docker:
+    name: registry
+    image: registry:2
+    restart_policy: always
+    env:
+      REGISTRY_HTTP_TLS_CERTIFICATE: /var/lib/registry/cert.crt
+      REGISTRY_HTTP_TLS_KEY: /var/lib/registry/cert.key
+    ports:
+      - 5000:5000
+    volumes:
+      - /var/lib/docker-registry:/var/lib/registry:rw
+
+- name: squid
+  docker:
+    name: squid
+    image: sameersbn/squid
+    restart_policy: always
+    ports:
+      - 3128:3128
