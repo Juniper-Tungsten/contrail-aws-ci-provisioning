@@ -18,30 +18,29 @@
     that:
       - github_plugin_cmd.stdout == ""
 
-- name: container-networking-ansible config
-  template: src=container-networking-ansible-config.j2 dest="{{ job_config_tmp }}/container-networking-ansible-config.xml"
-
-- name: contrail-kubernetes job configuration
-  copy: src=contrail-kubernetes-config.xml dest="{{ job_config_tmp }}/contrail-kubernetes-config.xml"
+- name: Copy job definitions
+  copy: src="{{ item }}.xml" dest="{{ job_config_tmp }}"
+  with_items:
+    - container-networking-ansible
+    - contrail-kubernetes
 
 - name: list jobs
   command: java -jar {{ jenkins_jar_location }} -s http://localhost:8080 -i /var/lib/jenkins/jenkins.key list-jobs
   register: job_list
 
-- name: create container-networking-ansible job
-  shell: "cat {{ job_config_tmp }}/container-networking-ansible-config.xml | java -jar {{ jenkins_jar_location }} -s http://localhost:8080 -i /var/lib/jenkins/jenkins.key create-job container-networking-ansible"
+- name: create job
+  shell: "cat {{ job_config_tmp }}/{{ item }}.xml | java -jar {{ jenkins_jar_location }} -s http://localhost:8080 -i /var/lib/jenkins/jenkins.key create-job {{ item }}"
   register: create_job
-  when: "'container-networking-ansible' not in job_list.stdout_lines"
+  with_items:
+    - container-networking-ansible
+    - contrail-kubernetes
+  when: "'{{ item }}' not in job_list.stdout_lines"
 
 - name: update container-networking-ansible job
-  shell: "cat {{ job_config_tmp }}/container-networking-ansible-config.xml | java -jar {{ jenkins_jar_location }} -s http://localhost:8080 -i /var/lib/jenkins/jenkins.key update-job container-networking-ansible"
+  shell: "cat {{ job_config_tmp }}/{{ item }}.xml | java -jar {{ jenkins_jar_location }} -s http://localhost:8080 -i /var/lib/jenkins/jenkins.key update-job {{ item }}"
   register: update_job
-  when: "'container-networking-ansible' in job_list.stdout_lines"
+  with_items:
+    - container-networking-ansible
+    - contrail-kubernetes
+  when: "'{{ item }}' in job_list.stdout_lines"
 
-- name: create contrail-kubernetes job
-  shell: "cat {{ job_config_tmp }}/contrail-kubernetes-config.xml | java -jar {{ jenkins_jar_location }} -s http://localhost:8080 -i /var/lib/jenkins/jenkins.key create-job contrail-kubernetes"
-  when: "'contrail-kubernetes' not in job_list.stdout_lines"
-
-- name: update contrail-kubernetes job
-  shell: "cat {{ job_config_tmp }}/contrail-kubernetes-config.xml | java -jar {{ jenkins_jar_location }} -s http://localhost:8080 -i /var/lib/jenkins/jenkins.key update-job contrail-kubernetes"
-  when: "'contrail-kubernetes' in job_list.stdout_lines"
