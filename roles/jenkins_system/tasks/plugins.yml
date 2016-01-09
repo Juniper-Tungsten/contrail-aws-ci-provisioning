@@ -31,7 +31,9 @@
     - github
     - ssh-credentials
     - ssh-agent
+    - docker-workflow
     - workflow-aggregator
+    - workflow-multibranch
     - plain-credentials
     - credentials-binding
     - parallel-test-executor

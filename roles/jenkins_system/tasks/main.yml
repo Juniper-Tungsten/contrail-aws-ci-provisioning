@@ -1,4 +1,7 @@
 ---
+- name: Add user jenkins to the docker group
+  command: gpasswd -a jenkins docker
+
 - name: Wait for Jenkins to start up before proceeding.
   shell: "curl -u admin:{{ jenkins_passwd }} -D - --silent http://localhost:8080/cli/"
   register: result

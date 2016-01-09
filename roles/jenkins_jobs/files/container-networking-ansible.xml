@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject plugin="w
+orkflow-multibranch@1.12">
+  <description>
+    Jenkins multibranch workflow for OpenContrail ansible provisioning.
+  </description>
+  <sources class="jenkins.branch.MultiBranchProject$BranchSourceList" plugin="branch-api@1.0">
+    <data>
+      <jenkins.branch.BranchSource>
+        <source class="jenkins.plugins.git.GitSCMSource" plugin="git@2.4.0">
+          <remote>https://github.com/Juniper/container-networking-ansible</remote>
+          <credentialsId></credentialsId>
+          <includes>*</includes>
+          <excludes></excludes>
+          <ignoreOnPushNotifications>false</ignoreOnPushNotifications>
+        </source>
+        <strategy class="jenkins.branch.DefaultBranchPropertyStrategy">
+          <properties class="empty-list"/>
+        </strategy>
+      </jenkins.branch.BranchSource>
+    </data>
+  </sources>
+</org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject>
