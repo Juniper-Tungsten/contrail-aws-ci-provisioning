@@ -23,9 +23,10 @@ strategy = instance.getAuthorizationStrategy()
 
 if (strategy == null || strategy.class != hudson.security.GlobalMatrixAuthorizationStrategy) {
     strategy = new GlobalMatrixAuthorizationStrategy()
-    strategy.add(Jenkins.ADMINISTER, "admin")
-    strategy.add(Permission.READ, ACL.ANONYMOUS_USERNAME)
     instance.setAuthorizationStrategy(strategy)
 }
+
+strategy.add(Jenkins.ADMINISTER, "admin")
+strategy.add(Permission.READ, ACL.ANONYMOUS_USERNAME)
 
 instance.save();

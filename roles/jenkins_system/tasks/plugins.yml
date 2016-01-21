@@ -26,9 +26,9 @@
     - git
 #   - ec2
 #   - ansible
-#   - docker-build-publish
 #   - aws-credentials
     - github
+    - github-branch-source
     - ssh-credentials
     - ssh-agent
     - docker-workflow

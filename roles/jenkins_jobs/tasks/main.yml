@@ -21,26 +21,22 @@
 - name: Copy job definitions
   copy: src="{{ item }}.xml" dest="{{ job_config_tmp }}"
   with_items:
-    - container-networking-ansible
-    - contrail-kubernetes
+    - opencontrail
 
 - name: list jobs
   command: java -jar {{ jenkins_jar_location }} -s http://localhost:8080 -i /var/lib/jenkins/jenkins.key list-jobs
   register: job_list
 
-- name: create job
+- name: create jobs
   shell: "cat {{ job_config_tmp }}/{{ item }}.xml | java -jar {{ jenkins_jar_location }} -s http://localhost:8080 -i /var/lib/jenkins/jenkins.key create-job {{ item }}"
   register: create_job
   with_items:
-    - container-networking-ansible
-    - contrail-kubernetes
+    - opencontrail
   when: "'{{ item }}' not in job_list.stdout_lines"
 
-- name: update container-networking-ansible job
+- name: update jobs
   shell: "cat {{ job_config_tmp }}/{{ item }}.xml | java -jar {{ jenkins_jar_location }} -s http://localhost:8080 -i /var/lib/jenkins/jenkins.key update-job {{ item }}"
   register: update_job
   with_items:
-    - container-networking-ansible
-    - contrail-kubernetes
+    - opencontrail
   when: "'{{ item }}' in job_list.stdout_lines"
-
