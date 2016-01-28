@@ -29,4 +29,5 @@ if (strategy == null || strategy.class != hudson.security.GlobalMatrixAuthorizat
 strategy.add(Jenkins.ADMINISTER, "admin")
 strategy.add(Permission.READ, ACL.ANONYMOUS_USERNAME)
 
+instance.setNumExecutors(10)
 instance.save();

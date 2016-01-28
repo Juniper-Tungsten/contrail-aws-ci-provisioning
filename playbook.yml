@@ -35,10 +35,3 @@
   vars_files:
     - vars/secrets.yml
 
-- hosts: jenkins
-  roles:
-    - triggers
-  tags:
-    - triggers
-  vars_files:
-    - vars/secrets.yml
